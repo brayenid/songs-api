@@ -1,0 +1,33 @@
+###
+POST  http://localhost:3000/users
+Content-Type: application/json
+
+{
+    "username" : "admin",
+    "password" : "1234",
+    "fullname" : "Brayen Luhat"
+}
+###
+POST http://localhost:3000/authentications
+Content-Type: application/json
+
+{
+    "username" : "admin",
+    "password" : "1234"
+}
+
+###
+DELETE http://localhost:3000/authentications
+Content-Type: application/json
+
+{
+    "refreshToken" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItaEg1cjBnSEUiLCJpYXQiOjE2NzUzMzUyMjJ9.4Dn1DRJ5VRmHQ0kacViMeb7yVnczHH0sE302m4TLS9w"
+}
+
+###
+PUT http://localhost:3000/authentications
+Content-Type: application/json
+
+{
+    "refreshToken" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItaEg1cjBnSEUiLCJpYXQiOjE2NzUzMzU0ODN9.ZxHXJWeXb553iujpzUHxxXG4aWGxjLktavbdDM94KRw"
+}

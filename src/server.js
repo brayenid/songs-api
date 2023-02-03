@@ -1,11 +1,23 @@
 import dotenv from 'dotenv'
 import Hapi from '@hapi/hapi'
 import ClientError from './exceptions/ClientError.js'
+
 import albums from './api/albums/index.js'
 import songs from './api/songs/index.js'
+import users from './api/users/index.js'
+import authentications from './api/authentications/index.js'
+
 import AlbumService from './services/db/AlbumService.js'
 import SongService from './services/db/SongService.js'
-import Validator from './utils/validator/index.js'
+import UserService from './services/db/UserService.js'
+import AuthenticationService from './services/db/AuthenticationService.js'
+
+import SongValidator from './utils/validator/songs/index.js'
+import AlbumValidator from './utils/validator/albums/index.js'
+import UserValidator from './utils/validator/users/index.js'
+import UserAuthenticationValidator from './utils/validator/authentications/index.js'
+
+import TokenManager from './utils/token/TokenManager.js'
 
 dotenv.config()
 
@@ -25,14 +37,30 @@ const init = async () => {
       plugin: albums,
       options: {
         service: new AlbumService(),
-        validator: Validator
+        validator: AlbumValidator
       }
     },
     {
       plugin: songs,
       options: {
         service: new SongService(),
-        validator: Validator
+        validator: SongValidator
+      }
+    },
+    {
+      plugin: users,
+      options: {
+        service: new UserService(),
+        validator: UserValidator
+      }
+    },
+    {
+      plugin: authentications,
+      options: {
+        authenticationsService: new AuthenticationService(),
+        usersService: new UserService(),
+        tokenManager: TokenManager,
+        validator: UserAuthenticationValidator
       }
     }
   ])
@@ -56,7 +84,7 @@ const init = async () => {
 
       const newResponse = h.response({
         status: 'error',
-        message: 'terjadi kegagalan pada server kami'
+        message: 'server error'
       })
       newResponse.code(500)
       return newResponse
@@ -65,7 +93,7 @@ const init = async () => {
   })
 
   await server.start()
-  console.log(`Server berjalan pada ${server.info.uri}`)
+  console.log(`Server running on ${server.info.uri}`)
 }
 
 init()

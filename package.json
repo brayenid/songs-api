@@ -23,7 +23,9 @@
   },
   "dependencies": {
     "@hapi/hapi": "^21.2.0",
+    "@hapi/jwt": "^3.0.0",
     "auto-bind": "^5.0.1",
+    "bcrypt": "^5.1.0",
     "joi": "^17.7.0",
     "nanoid": "^4.0.0",
     "node-pg-migrate": "^6.2.2",

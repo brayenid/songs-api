@@ -9,22 +9,23 @@ class SongService {
     this._pool = new Pool()
   }
 
-  async addSong({ title, year, performer, genre, duration, albumId }) {
+  async addSong(payload) {
+    const { title, year, performer, genre, duration, albumId } = payload
     const id = nanoid(16)
     const query = {
       text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id',
       values: [id, title, year, performer, genre, duration, albumId]
     }
-    const result = await this._pool.query(query)
-    if (!result.rows.length) {
+    const { rows, rowCount } = await this._pool.query(query)
+    if (!rowCount) {
       throw new InvariantError('Add song failed')
     }
-    return result.rows[0].id
+    return rows[0].id
   }
 
   async getSongs() {
-    const result = await this._pool.query('SELECT id, title, performer FROM songs')
-    return result.rows
+    const { rows } = await this._pool.query('SELECT id, title, performer FROM songs')
+    return rows
   }
 
   async getSongById(id) {
@@ -32,16 +33,16 @@ class SongService {
       text: 'SELECT * FROM songs WHERE id = $1',
       values: [id]
     }
-    const result = await this._pool.query(query)
-    if (!result.rows.length) {
+    const { rows, rowCount } = await this._pool.query(query)
+    if (!rowCount) {
       throw new NotFoundError('There is no such song with this ID')
     }
-    return result.rows[0]
+    return rows[0]
   }
 
   async getSongByTitleAndPerformer(title, performer) {
     const query = {
-      text: 'SELECT * FROM songs WHERE LOWER(title) LIKE LOWER($1) AND LOWER(performer) LIKE LOWER($2)',
+      text: 'SELECT id, title, performer FROM songs WHERE LOWER(title) LIKE LOWER($1) AND LOWER(performer) LIKE LOWER($2)',
       values: [`%${title}%`, `%${performer}%`]
     }
     const result = await this._pool.query(query)

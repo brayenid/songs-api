@@ -1,36 +1,27 @@
 /* eslint-disable camelcase */
 
 exports.up = (pgm) => {
-  pgm.createTable('songs', {
+  pgm.createTable('users', {
     id: {
       type: 'VARCHAR(30)',
       primaryKey: true
     },
-    title: {
+    username: {
+      type: 'VARCHAR(30)',
+      unique: true,
+      notNull: true
+    },
+    password: {
       type: 'TEXT',
       notNull: true
     },
-    year: {
-      type: 'INTEGER',
-      notNull: true
-    },
-    performer: {
+    fullname: {
       type: 'TEXT',
       notNull: true
-    },
-    genre: {
-      type: 'TEXT',
-      notNull: true
-    },
-    duration: {
-      type: 'INTEGER'
-    },
-    album_id: {
-      type: 'TEXT'
     }
   })
 }
 
 exports.down = (pgm) => {
-  pgm.dropTable('songs')
+  pgm.dropTable('users')
 }
