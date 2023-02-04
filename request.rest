@@ -1,5 +1,5 @@
 ###
-POST  http://localhost:3000/users
+POST  http://localhost:5000/users
 Content-Type: application/json
 
 {
@@ -8,26 +8,37 @@ Content-Type: application/json
     "fullname" : "Brayen Luhat"
 }
 ###
-POST http://localhost:3000/authentications
+POST http://localhost:5000/authentications
 Content-Type: application/json
 
 {
     "username" : "admin",
     "password" : "1234"
 }
-
 ###
-DELETE http://localhost:3000/authentications
+DELETE http://localhost:5000/authentications
 Content-Type: application/json
 
 {
-    "refreshToken" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItaEg1cjBnSEUiLCJpYXQiOjE2NzUzMzUyMjJ9.4Dn1DRJ5VRmHQ0kacViMeb7yVnczHH0sE302m4TLS9w"
+    "refreshToken" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItdENQQmxGbkciLCJpYXQiOjE2NzU0MjYzNDh9.GYWhnUNq5RNWFZ9sUJ_lv1HCuD5ZrvQuSYWbZ1rhIUA"
 }
-
 ###
-PUT http://localhost:3000/authentications
+PUT http://localhost:5000/authentications
 Content-Type: application/json
+{
+    "refreshToken" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItdENQQmxGbkciLCJpYXQiOjE2NzU0MjYzNDh9.GYWhnUNq5RNWFZ9sUJ_lv1HCuD5ZrvQuSYWbZ1rhIUA"
+}
+###
+GET http://localhost:5000/songs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItdENQQmxGbkciLCJpYXQiOjE2NzU0MjYzNDh9.ZAdIGRvuI5xAGuLY7-mKFgBBhK2eCHR-oJ5DDlaTv_Y
+###
+POST  http://localhost:5000/playlists
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItdENQQmxGbkciLCJpYXQiOjE2NzU0MjYzNDh9.ZAdIGRvuI5xAGuLY7-mKFgBBhK2eCHR-oJ5DDlaTv_Y
 
 {
-    "refreshToken" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItaEg1cjBnSEUiLCJpYXQiOjE2NzUzMzU0ODN9.ZxHXJWeXb553iujpzUHxxXG4aWGxjLktavbdDM94KRw"
+    "name" : "TEST playlist"
 }
+###
+GET http://localhost:5000/playlists
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVzZXItdENQQmxGbkciLCJpYXQiOjE2NzU0MjYzNDh9.ZAdIGRvuI5xAGuLY7-mKFgBBhK2eCHR-oJ5DDlaTv_Y

@@ -1,11 +1,11 @@
-import autobind from 'auto-bind'
+import autoBind from 'auto-bind'
 
 class UserHandler {
   constructor(service, validator) {
     this._service = service
     this._validator = validator
 
-    autobind(this)
+    autoBind(this)
   }
 
   async postUserHandler(request, h) {

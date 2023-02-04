@@ -1,4 +1,4 @@
-import autobind from 'auto-bind'
+import autoBind from 'auto-bind'
 
 class AuthenticationHandler {
   constructor(authenticationsService, usersService, tokenManager, validator) {
@@ -7,7 +7,7 @@ class AuthenticationHandler {
     this._tokenManager = tokenManager
     this._validator = validator
 
-    autobind(this)
+    autoBind(this)
   }
 
   async postAuthenticationHandler(request, h) {
