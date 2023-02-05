@@ -8,18 +8,21 @@ import songs from './api/songs/index.js'
 import users from './api/users/index.js'
 import authentications from './api/authentications/index.js'
 import playlists from './api/playlists/index.js'
+import collaborations from './api/collaborations/index.js'
 
 import AlbumService from './services/db/AlbumService.js'
 import SongService from './services/db/SongService.js'
 import UserService from './services/db/UserService.js'
 import AuthenticationService from './services/db/AuthenticationService.js'
 import PlaylistService from './services/db/PlaylistService.js'
+import CollaborationService from './services/db/CollaborationService.js'
 
 import SongValidator from './utils/validator/songs/index.js'
 import AlbumValidator from './utils/validator/albums/index.js'
 import UserValidator from './utils/validator/users/index.js'
 import UserAuthenticationValidator from './utils/validator/authentications/index.js'
 import PlaylistValidator from './utils/validator/playlists/index.js'
+import CollaborationValidator from './utils/validator/collaborations/index.js'
 
 import TokenManager from './utils/token/TokenManager.js'
 
@@ -92,6 +95,14 @@ const init = async () => {
       options: {
         service: new PlaylistService(),
         validator: PlaylistValidator
+      }
+    },
+    {
+      plugin: collaborations,
+      options: {
+        service: new CollaborationService(),
+        playlistService: new PlaylistService(),
+        validator: CollaborationValidator
       }
     }
   ])

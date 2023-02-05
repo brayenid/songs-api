@@ -30,7 +30,7 @@ class PlaylistHandler {
       return {
         id: result.id,
         name: result.name,
-        username: result.owner
+        username: result.username
       }
     })
     const response = h.response({
@@ -61,7 +61,7 @@ class PlaylistHandler {
     const { id: playlistId } = request.params
     const { songId } = request.payload
     const { id: owner } = request.auth.credentials
-    await this._service.verifyPlaylistOwner(playlistId, owner)
+    await this._service.verifyPlaylistOwnerCollaborator(playlistId, owner)
 
     const result = await this._service.addSongToPlaylist(playlistId, songId)
     await this._service.addPlaylistActivities({ playlistId, songId, username: owner, action: 'add' })
@@ -80,7 +80,7 @@ class PlaylistHandler {
   async getPlaylistActivitiesHandler(request, h) {
     const { id: owner } = request.auth.credentials
     const { id: playlistId } = request.params
-    await this._service.verifyPlaylistOwner(playlistId, owner)
+    await this._service.verifyPlaylistOwnerCollaborator(playlistId, owner)
     const result = await this._service.getPlaylistActivities(playlistId)
     const mappedResult = result.map((result) => {
       return {
@@ -106,7 +106,7 @@ class PlaylistHandler {
     const { id: owner } = request.auth.credentials
     const { id: playlistId } = request.params
 
-    await this._service.verifyPlaylistOwner(playlistId, owner)
+    await this._service.verifyPlaylistOwnerCollaborator(playlistId, owner)
     const result = await this._service.getSongsInPlaylist(owner)
     const { id, name, username } = await this._service.getPlaylistById(playlistId)
     const response = h.response({

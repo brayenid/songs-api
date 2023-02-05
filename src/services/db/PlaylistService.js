@@ -26,13 +26,18 @@ class PlaylistService {
   async getPlaylists(id) {
     if (!id) throw new NotFoundError('Your id is not valid')
     const query = {
-      text: 'SELECT * FROM playlists WHERE owner = $1',
+      text: `
+      SELECT DISTINCT playlists.id, playlists.name, playlists.owner, collaborations.user_id, users.username 
+      FROM playlists 
+      LEFT JOIN collaborations 
+      ON playlists.id = collaborations.playlist_id
+      LEFT JOIN users
+      ON playlists.owner = users.id
+      WHERE playlists.owner = $1 OR collaborations.user_id = $1
+      `,
       values: [id]
     }
-    const { rowCount, rows } = await this._pool.query(query)
-    if (!rowCount) {
-      throw new NotFoundError('You have no playlist')
-    }
+    const { rows } = await this._pool.query(query)
     return rows
   }
 
@@ -63,11 +68,14 @@ class PlaylistService {
 
   async getSongsInPlaylist(owner) {
     const query = {
-      text: `SELECT songs.id, songs.title, songs.performer
+      text: `SELECT DISTINCT songs.id, songs.title, songs.performer
         FROM songs RIGHT JOIN playlist_songs 
         ON songs.id = playlist_songs.song_id 
-        JOIN playlists ON playlist_id = playlists.id
-        WHERE playlists.owner = $1`,
+        LEFT JOIN playlists 
+        ON playlist_songs.playlist_id = playlists.id
+        LEFT JOIN collaborations
+        ON playlist_songs.playlist_id = collaborations.playlist_id
+        WHERE playlists.owner = $1 OR collaborations.user_id = $1`,
       values: [owner]
     }
     const { rows, rowCount } = await this._pool.query(query)
@@ -119,9 +127,33 @@ class PlaylistService {
     return rows
   }
 
+  async verifyPlaylistOwnerCollaborator(playlistId, owner) {
+    const query = {
+      text: `
+      SELECT * FROM playlists 
+      LEFT JOIN collaborations 
+      ON playlists.id = collaborations.playlist_id
+      WHERE playlists.id = $1
+      `,
+      values: [playlistId]
+    }
+    const { rowCount, rows } = await this._pool.query(query)
+    if (!rowCount) {
+      throw new NotFoundError('No song in this playlist')
+    }
+    if (rows[0].owner !== owner) {
+      if (rows[0].user_id !== owner) {
+        throw new AuthorizationError('You have no access to this playlist')
+      }
+    }
+  }
+
   async verifyPlaylistOwner(playlistId, owner) {
     const query = {
-      text: 'SELECT * FROM playlists WHERE id = $1',
+      text: `
+      SELECT * FROM playlists 
+      WHERE playlists.id = $1
+      `,
       values: [playlistId]
     }
     const { rowCount, rows } = await this._pool.query(query)
@@ -135,7 +167,13 @@ class PlaylistService {
 
   async verifyPlaylistOwnerBySong(songId, owner) {
     const query = {
-      text: 'SELECT playlists.owner FROM playlist_songs JOIN playlists ON playlist_songs.playlist_id = playlists.id WHERE playlist_songs.song_id = $1 AND playlists.owner = $2 ',
+      text: `SELECT playlist_songs.playlist_id, playlists.owner, collaborations.user_id 
+      FROM playlist_songs 
+      JOIN playlists 
+      ON playlist_songs.playlist_id = playlists.id 
+      LEFT JOIN collaborations 
+      ON playlist_songs.playlist_id = collaborations.playlist_id WHERE playlist_songs.song_id = $1 
+      AND (playlists.owner = $2 OR collaborations.user_id = $2)`,
       values: [songId, owner]
     }
     const { rowCount } = await this._pool.query(query)
@@ -154,15 +192,6 @@ class PlaylistService {
     }
     const { rows } = await this._pool.query(query)
     return rows[0]
-  }
-
-  async getUsernameByAuthId(id) {
-    const query = {
-      text: 'SELECT username FROM users WHERE id = $1',
-      values: [id]
-    }
-    const { rows } = await this._pool.query(query)
-    return rows[0].username
   }
 }
 
