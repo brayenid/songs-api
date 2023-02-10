@@ -8,7 +8,7 @@ class SongsHandler {
   }
 
   async postSongHandler(request, h) {
-    this._validator.songPayload(request.payload)
+    await this._validator.songPayload(request.payload)
     const songId = await this._service.addSong(request.payload)
     const response = h.response({
       status: 'success',
@@ -78,7 +78,7 @@ class SongsHandler {
   }
 
   async putSongHandler(request, h) {
-    this._validator.songPayload(request.payload)
+    await this._validator.songPayload(request.payload)
     const { id } = request.params
     await this._service.putSong(id, request.payload)
     const response = h.response({

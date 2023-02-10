@@ -1,37 +1,53 @@
-import dotenv from 'dotenv'
+/*eslint-disable spaced-comment */
+import config from './utils/config.js'
 import Hapi from '@hapi/hapi'
 import ClientError from './exceptions/ClientError.js'
 import Jwt from '@hapi/jwt'
+import Inert from '@hapi/inert'
 
+//Plugins
 import albums from './api/albums/index.js'
 import songs from './api/songs/index.js'
 import users from './api/users/index.js'
 import authentications from './api/authentications/index.js'
 import playlists from './api/playlists/index.js'
 import collaborations from './api/collaborations/index.js'
+import _exports from './api/exports/index.js'
+import uploads from './api/uploads/index.js'
 
+// Services
 import AlbumService from './services/db/AlbumService.js'
 import SongService from './services/db/SongService.js'
 import UserService from './services/db/UserService.js'
 import AuthenticationService from './services/db/AuthenticationService.js'
 import PlaylistService from './services/db/PlaylistService.js'
 import CollaborationService from './services/db/CollaborationService.js'
+import ProducerService from './services/rabitmq/ProducerService.js'
+import StorageService from './services/storage/StorageService.js'
+import LikeService from './services/db/LikeService.js'
+import CacheService from './services/redis/CacheService.js'
 
+// Validator
 import SongValidator from './utils/validator/songs/index.js'
 import AlbumValidator from './utils/validator/albums/index.js'
 import UserValidator from './utils/validator/users/index.js'
 import UserAuthenticationValidator from './utils/validator/authentications/index.js'
 import PlaylistValidator from './utils/validator/playlists/index.js'
 import CollaborationValidator from './utils/validator/collaborations/index.js'
+import ExportValidator from './utils/validator/exports/index.js'
+import UploadValidator from './utils/validator/uploads/index.js'
 
 import TokenManager from './utils/token/TokenManager.js'
 
-dotenv.config()
+import path from 'path'
+import { fileURLToPath } from 'url'
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const init = async () => {
+  const cacheService = new CacheService()
   const server = Hapi.server({
-    port: process.env.PORT,
-    host: process.env.HOST,
+    port: config.server.port,
+    host: config.server.host,
     routes: {
       cors: {
         origin: ['*']
@@ -39,15 +55,22 @@ const init = async () => {
     }
   })
 
-  await server.register(Jwt)
+  await server.register([
+    {
+      plugin: Jwt
+    },
+    {
+      plugin: Inert
+    }
+  ])
 
   server.auth.strategy('songsapp_jwt', 'jwt', {
-    keys: process.env.ACCESS_TOKEN,
+    keys: config.token.accessToken,
     verify: {
       aud: false,
       iss: false,
       sub: false,
-      maxAgeSec: process.env.ACCESS_TOKEN_AGE
+      maxAgeSec: config.token.accessTokenAge
     },
     validate: (artifacts) => {
       return {
@@ -64,7 +87,10 @@ const init = async () => {
       plugin: albums,
       options: {
         service: new AlbumService(),
-        validator: AlbumValidator
+        validator: AlbumValidator,
+        uploadService: new StorageService(path.resolve(__dirname, 'api/uploads/file/images')),
+        uploadValidator: UploadValidator,
+        likeService: new LikeService(cacheService)
       }
     },
     {
@@ -104,6 +130,17 @@ const init = async () => {
         playlistService: new PlaylistService(),
         validator: CollaborationValidator
       }
+    },
+    {
+      plugin: _exports,
+      options: {
+        service: ProducerService,
+        playlistService: new PlaylistService(),
+        validator: ExportValidator
+      }
+    },
+    {
+      plugin: uploads
     }
   ])
 

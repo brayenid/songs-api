@@ -36,9 +36,18 @@ class AlbumService {
     if (!result.rows.length) {
       throw new NotFoundError('There is no such file with this ID')
     }
+
+    const resultMapped = result.rows.map((res) => {
+      return {
+        id: res.id,
+        name: res.name,
+        year: res.year,
+        coverUrl: res.cover
+      }
+    })
     const reduceSongDetail = rows.map(({ id, title, performer }) => ({ id, title, performer }))
     const response = {
-      ...result.rows[0],
+      ...resultMapped[0],
       songs: reduceSongDetail
     }
     return response
@@ -65,6 +74,14 @@ class AlbumService {
     if (!result.rows.length) {
       throw new NotFoundError('Delete album failed, the ID is not valid')
     }
+  }
+
+  async updateAlbumCover(imageUrl, id) {
+    const query = {
+      text: 'UPDATE albums SET cover = $1 WHERE id = $2',
+      values: [imageUrl, id]
+    }
+    await this._pool.query(query)
   }
 }
 
